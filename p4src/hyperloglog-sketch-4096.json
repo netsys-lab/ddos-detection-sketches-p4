@@ -1,0 +1,4658 @@
+{
+  "header_types" : [
+    {
+      "name" : "scalars_0",
+      "id" : 0,
+      "fields" : [
+        ["tmp", 32, false],
+        ["tmp_0", 32, false],
+        ["metadata.hash_val_x", 32, false],
+        ["metadata.register_index_j", 12, false],
+        ["metadata.hash_val_w", 20, false],
+        ["metadata.current_register_val_Mj", 5, false],
+        ["metadata.rho", 5, false],
+        ["_padding_0", 6, false]
+      ]
+    },
+    {
+      "name" : "standard_metadata",
+      "id" : 1,
+      "fields" : [
+        ["ingress_port", 9, false],
+        ["egress_spec", 9, false],
+        ["egress_port", 9, false],
+        ["instance_type", 32, false],
+        ["packet_length", 32, false],
+        ["enq_timestamp", 32, false],
+        ["enq_qdepth", 19, false],
+        ["deq_timedelta", 32, false],
+        ["deq_qdepth", 19, false],
+        ["ingress_global_timestamp", 48, false],
+        ["egress_global_timestamp", 48, false],
+        ["mcast_grp", 16, false],
+        ["egress_rid", 16, false],
+        ["checksum_error", 1, false],
+        ["parser_error", 32, false],
+        ["priority", 3, false],
+        ["_padding", 3, false]
+      ]
+    },
+    {
+      "name" : "ethernet_t",
+      "id" : 2,
+      "fields" : [
+        ["dstAddr", 48, false],
+        ["srcAddr", 48, false],
+        ["etherType", 16, false]
+      ]
+    },
+    {
+      "name" : "ipv4_t",
+      "id" : 3,
+      "fields" : [
+        ["version", 4, false],
+        ["ihl", 4, false],
+        ["dscp", 6, false],
+        ["ecn", 2, false],
+        ["totalLen", 16, false],
+        ["identification", 16, false],
+        ["flags", 3, false],
+        ["fragOffset", 13, false],
+        ["ttl", 8, false],
+        ["protocol", 8, false],
+        ["hdrChecksum", 16, false],
+        ["srcAddr", 32, false],
+        ["dstAddr", 32, false]
+      ]
+    },
+    {
+      "name" : "tcp_t",
+      "id" : 4,
+      "fields" : [
+        ["srcPort", 16, false],
+        ["dstPort", 16, false],
+        ["seqNo", 32, false],
+        ["ackNo", 32, false],
+        ["dataOffset", 4, false],
+        ["res", 4, false],
+        ["cwr", 1, false],
+        ["ece", 1, false],
+        ["urg", 1, false],
+        ["ack", 1, false],
+        ["psh", 1, false],
+        ["rst", 1, false],
+        ["syn", 1, false],
+        ["fin", 1, false],
+        ["window", 16, false],
+        ["checksum", 16, false],
+        ["urgentPtr", 16, false]
+      ]
+    }
+  ],
+  "headers" : [
+    {
+      "name" : "scalars",
+      "id" : 0,
+      "header_type" : "scalars_0",
+      "metadata" : true,
+      "pi_omit" : true
+    },
+    {
+      "name" : "standard_metadata",
+      "id" : 1,
+      "header_type" : "standard_metadata",
+      "metadata" : true,
+      "pi_omit" : true
+    },
+    {
+      "name" : "ethernet",
+      "id" : 2,
+      "header_type" : "ethernet_t",
+      "metadata" : false,
+      "pi_omit" : true
+    },
+    {
+      "name" : "ipv4",
+      "id" : 3,
+      "header_type" : "ipv4_t",
+      "metadata" : false,
+      "pi_omit" : true
+    },
+    {
+      "name" : "tcp",
+      "id" : 4,
+      "header_type" : "tcp_t",
+      "metadata" : false,
+      "pi_omit" : true
+    }
+  ],
+  "header_stacks" : [],
+  "header_union_types" : [],
+  "header_unions" : [],
+  "header_union_stacks" : [],
+  "field_lists" : [],
+  "errors" : [
+    ["NoError", 1],
+    ["PacketTooShort", 2],
+    ["NoMatch", 3],
+    ["StackOutOfBounds", 4],
+    ["HeaderTooShort", 5],
+    ["ParserTimeout", 6],
+    ["ParserInvalidArgument", 7]
+  ],
+  "enums" : [],
+  "parsers" : [
+    {
+      "name" : "parser",
+      "id" : 0,
+      "init_state" : "start",
+      "parse_states" : [
+        {
+          "name" : "start",
+          "id" : 0,
+          "parser_ops" : [
+            {
+              "parameters" : [
+                {
+                  "type" : "regular",
+                  "value" : "ethernet"
+                }
+              ],
+              "op" : "extract"
+            }
+          ],
+          "transitions" : [
+            {
+              "type" : "hexstr",
+              "value" : "0x0800",
+              "mask" : null,
+              "next_state" : "parse_ipv4"
+            },
+            {
+              "value" : "default",
+              "mask" : null,
+              "next_state" : null
+            }
+          ],
+          "transition_key" : [
+            {
+              "type" : "field",
+              "value" : ["ethernet", "etherType"]
+            }
+          ]
+        },
+        {
+          "name" : "parse_ipv4",
+          "id" : 1,
+          "parser_ops" : [
+            {
+              "parameters" : [
+                {
+                  "type" : "regular",
+                  "value" : "ipv4"
+                }
+              ],
+              "op" : "extract"
+            }
+          ],
+          "transitions" : [
+            {
+              "type" : "hexstr",
+              "value" : "0x06",
+              "mask" : null,
+              "next_state" : "parse_tcp"
+            },
+            {
+              "value" : "default",
+              "mask" : null,
+              "next_state" : null
+            }
+          ],
+          "transition_key" : [
+            {
+              "type" : "field",
+              "value" : ["ipv4", "protocol"]
+            }
+          ]
+        },
+        {
+          "name" : "parse_tcp",
+          "id" : 2,
+          "parser_ops" : [
+            {
+              "parameters" : [
+                {
+                  "type" : "regular",
+                  "value" : "tcp"
+                }
+              ],
+              "op" : "extract"
+            }
+          ],
+          "transitions" : [
+            {
+              "value" : "default",
+              "mask" : null,
+              "next_state" : null
+            }
+          ],
+          "transition_key" : []
+        }
+      ]
+    }
+  ],
+  "parse_vsets" : [],
+  "deparsers" : [
+    {
+      "name" : "deparser",
+      "id" : 0,
+      "source_info" : {
+        "filename" : "p4src/include/parsers.p4",
+        "line" : 43,
+        "column" : 8,
+        "source_fragment" : "MyDeparser"
+      },
+      "order" : ["ethernet", "ipv4", "tcp"]
+    }
+  ],
+  "meter_arrays" : [],
+  "counter_arrays" : [
+    {
+      "name" : "MyIngress.packet_counter",
+      "id" : 0,
+      "source_info" : {
+        "filename" : "p4src/hyperloglog-sketch-4096.p4",
+        "line" : 65,
+        "column" : 36,
+        "source_fragment" : "packet_counter"
+      },
+      "size" : 1,
+      "is_direct" : false
+    }
+  ],
+  "register_arrays" : [
+    {
+      "name" : "MyIngress.hyperloglog_sketch",
+      "id" : 0,
+      "source_info" : {
+        "filename" : "p4src/hyperloglog-sketch-4096.p4",
+        "line" : 64,
+        "column" : 27,
+        "source_fragment" : "hyperloglog_sketch"
+      },
+      "size" : 4096,
+      "bitwidth" : 5
+    }
+  ],
+  "calculations" : [
+    {
+      "name" : "calc",
+      "id" : 0,
+      "algo" : "crc32_custom",
+      "input" : [
+        {
+          "type" : "field",
+          "value" : ["ipv4", "srcAddr"]
+        }
+      ]
+    }
+  ],
+  "learn_lists" : [],
+  "actions" : [
+    {
+      "name" : "NoAction",
+      "id" : 0,
+      "runtime_data" : [],
+      "primitives" : []
+    },
+    {
+      "name" : "MyIngress.forward",
+      "id" : 1,
+      "runtime_data" : [
+        {
+          "name" : "egress_port",
+          "bitwidth" : 9
+        }
+      ],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["standard_metadata", "egress_spec"]
+            },
+            {
+              "type" : "runtime_data",
+              "value" : 0
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 72,
+            "column" : 8,
+            "source_fragment" : "standard_metadata.egress_spec = egress_port"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "hyperloglogsketch4096l93",
+      "id" : 2,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata.rho"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x15"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 320,
+            "source_fragment" : "meta.rho = 32 - 12 + 1"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "hyperloglogsketch4096l93_0",
+      "id" : 3,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata.rho"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x14"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 407,
+            "source_fragment" : "meta.rho = 32 - 12 - 0"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "hyperloglogsketch4096l93_1",
+      "id" : 4,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata.rho"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x13"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 494,
+            "source_fragment" : "meta.rho = 32 - 12 - 1"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "hyperloglogsketch4096l93_2",
+      "id" : 5,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata.rho"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x12"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 581,
+            "source_fragment" : "meta.rho = 32 - 12 - 2"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "hyperloglogsketch4096l93_3",
+      "id" : 6,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata.rho"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x11"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 668,
+            "source_fragment" : "meta.rho = 32 - 12 - 3"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "hyperloglogsketch4096l93_4",
+      "id" : 7,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata.rho"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x10"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 755,
+            "source_fragment" : "meta.rho = 32 - 12 - 4"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "hyperloglogsketch4096l93_5",
+      "id" : 8,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata.rho"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x0f"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 842,
+            "source_fragment" : "meta.rho = 32 - 12 - 5"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "hyperloglogsketch4096l93_6",
+      "id" : 9,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata.rho"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x0e"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 929,
+            "source_fragment" : "meta.rho = 32 - 12 - 6"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "hyperloglogsketch4096l93_7",
+      "id" : 10,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata.rho"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x0d"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 1016,
+            "source_fragment" : "meta.rho = 32 - 12 - 7"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "hyperloglogsketch4096l93_8",
+      "id" : 11,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata.rho"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x0c"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 1103,
+            "source_fragment" : "meta.rho = 32 - 12 - 8"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "hyperloglogsketch4096l93_9",
+      "id" : 12,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata.rho"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x0b"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 1190,
+            "source_fragment" : "meta.rho = 32 - 12 - 9"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "hyperloglogsketch4096l93_10",
+      "id" : 13,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata.rho"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x0a"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 1278,
+            "source_fragment" : "meta.rho = 32 - 12 - 10"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "hyperloglogsketch4096l93_11",
+      "id" : 14,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata.rho"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x09"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 1367,
+            "source_fragment" : "meta.rho = 32 - 12 - 11"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "hyperloglogsketch4096l93_12",
+      "id" : 15,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata.rho"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x08"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 1456,
+            "source_fragment" : "meta.rho = 32 - 12 - 12"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "hyperloglogsketch4096l93_13",
+      "id" : 16,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata.rho"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x07"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 1545,
+            "source_fragment" : "meta.rho = 32 - 12 - 13"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "hyperloglogsketch4096l93_14",
+      "id" : 17,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata.rho"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x06"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 1634,
+            "source_fragment" : "meta.rho = 32 - 12 - 14"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "hyperloglogsketch4096l93_15",
+      "id" : 18,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata.rho"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x05"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 1723,
+            "source_fragment" : "meta.rho = 32 - 12 - 15"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "hyperloglogsketch4096l93_16",
+      "id" : 19,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata.rho"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x04"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 1812,
+            "source_fragment" : "meta.rho = 32 - 12 - 16"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "hyperloglogsketch4096l93_17",
+      "id" : 20,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata.rho"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x03"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 1901,
+            "source_fragment" : "meta.rho = 32 - 12 - 17"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "hyperloglogsketch4096l93_18",
+      "id" : 21,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata.rho"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x02"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 1990,
+            "source_fragment" : "meta.rho = 32 - 12 - 18"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "hyperloglogsketch4096l93_19",
+      "id" : 22,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata.rho"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x01"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 2024,
+            "source_fragment" : "meta.rho = 1"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "hyperloglogsketch4096l92",
+      "id" : 23,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "count",
+          "parameters" : [
+            {
+              "type" : "counter_array",
+              "value" : "MyIngress.packet_counter"
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x00000000"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 92,
+            "column" : 12,
+            "source_fragment" : "packet_counter.count(0)"
+          }
+        },
+        {
+          "op" : "modify_field_with_hash_based_offset",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata.hash_val_x"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x0000"
+            },
+            {
+              "type" : "calculation",
+              "value" : "calc"
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0xffffffff"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 12,
+            "source_fragment" : "hash(meta.hash_val_x, HashAlgorithm.crc32_custom, (bit<16>)0, {hdr.ipv4.srcAddr}, (bit<32>)4294967295)"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata.register_index_j"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "field",
+                        "value" : ["scalars", "metadata.hash_val_x"]
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x0fff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 116,
+            "source_fragment" : "meta.register_index_j = meta.hash_val_x[11:0]"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata.hash_val_w"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : ">>",
+                              "left" : {
+                                "type" : "field",
+                                "value" : ["scalars", "metadata.hash_val_x"]
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0xc"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0xffffffff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x0fffff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 163,
+            "source_fragment" : "meta.hash_val_w = meta.hash_val_x[31:12]"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "field",
+                            "value" : ["scalars", "metadata.hash_val_x"]
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0x0fff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x0fff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xffffffff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 259,
+            "source_fragment" : "(bit<32>)meta.register_index_j"
+          }
+        },
+        {
+          "op" : "register_read",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata.current_register_val_Mj"]
+            },
+            {
+              "type" : "register_array",
+              "value" : "MyIngress.hyperloglog_sketch"
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 205,
+            "source_fragment" : "hyperloglog_sketch.read(meta.current_register_val_Mj, (bit<32>)meta.register_index_j)"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "hyperloglogsketch4096l93_20",
+      "id" : 24,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_0"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "field",
+                            "value" : ["scalars", "metadata.hash_val_x"]
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0x0fff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x0fff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xffffffff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 2112,
+            "source_fragment" : "(bit<32>)meta.register_index_j"
+          }
+        },
+        {
+          "op" : "register_write",
+          "parameters" : [
+            {
+              "type" : "register_array",
+              "value" : "MyIngress.hyperloglog_sketch"
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_0"]
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata.rho"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 2087,
+            "source_fragment" : "hyperloglog_sketch.write((bit<32>)meta.register_index_j, meta.rho)"
+          }
+        }
+      ]
+    }
+  ],
+  "pipelines" : [
+    {
+      "name" : "ingress",
+      "id" : 0,
+      "source_info" : {
+        "filename" : "p4src/hyperloglog-sketch-4096.p4",
+        "line" : 60,
+        "column" : 8,
+        "source_fragment" : "MyIngress"
+      },
+      "init_table" : "node_2",
+      "tables" : [
+        {
+          "name" : "tbl_hyperloglogsketch4096l92",
+          "id" : 0,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 92,
+            "column" : 12,
+            "source_fragment" : "packet_counter.count(0); ..."
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [23],
+          "actions" : ["hyperloglogsketch4096l92"],
+          "base_default_next" : "node_4",
+          "next_tables" : {
+            "hyperloglogsketch4096l92" : "node_4"
+          },
+          "default_entry" : {
+            "action_id" : 23,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_hyperloglogsketch4096l93",
+          "id" : 1,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 329,
+            "source_fragment" : "="
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [2],
+          "actions" : ["hyperloglogsketch4096l93"],
+          "base_default_next" : "node_45",
+          "next_tables" : {
+            "hyperloglogsketch4096l93" : "node_45"
+          },
+          "default_entry" : {
+            "action_id" : 2,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_hyperloglogsketch4096l93_0",
+          "id" : 2,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 416,
+            "source_fragment" : "="
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [3],
+          "actions" : ["hyperloglogsketch4096l93_0"],
+          "base_default_next" : "node_45",
+          "next_tables" : {
+            "hyperloglogsketch4096l93_0" : "node_45"
+          },
+          "default_entry" : {
+            "action_id" : 3,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_hyperloglogsketch4096l93_1",
+          "id" : 3,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 503,
+            "source_fragment" : "="
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [4],
+          "actions" : ["hyperloglogsketch4096l93_1"],
+          "base_default_next" : "node_45",
+          "next_tables" : {
+            "hyperloglogsketch4096l93_1" : "node_45"
+          },
+          "default_entry" : {
+            "action_id" : 4,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_hyperloglogsketch4096l93_2",
+          "id" : 4,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 590,
+            "source_fragment" : "="
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [5],
+          "actions" : ["hyperloglogsketch4096l93_2"],
+          "base_default_next" : "node_45",
+          "next_tables" : {
+            "hyperloglogsketch4096l93_2" : "node_45"
+          },
+          "default_entry" : {
+            "action_id" : 5,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_hyperloglogsketch4096l93_3",
+          "id" : 5,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 677,
+            "source_fragment" : "="
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [6],
+          "actions" : ["hyperloglogsketch4096l93_3"],
+          "base_default_next" : "node_45",
+          "next_tables" : {
+            "hyperloglogsketch4096l93_3" : "node_45"
+          },
+          "default_entry" : {
+            "action_id" : 6,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_hyperloglogsketch4096l93_4",
+          "id" : 6,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 764,
+            "source_fragment" : "="
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [7],
+          "actions" : ["hyperloglogsketch4096l93_4"],
+          "base_default_next" : "node_45",
+          "next_tables" : {
+            "hyperloglogsketch4096l93_4" : "node_45"
+          },
+          "default_entry" : {
+            "action_id" : 7,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_hyperloglogsketch4096l93_5",
+          "id" : 7,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 851,
+            "source_fragment" : "="
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [8],
+          "actions" : ["hyperloglogsketch4096l93_5"],
+          "base_default_next" : "node_45",
+          "next_tables" : {
+            "hyperloglogsketch4096l93_5" : "node_45"
+          },
+          "default_entry" : {
+            "action_id" : 8,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_hyperloglogsketch4096l93_6",
+          "id" : 8,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 938,
+            "source_fragment" : "="
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [9],
+          "actions" : ["hyperloglogsketch4096l93_6"],
+          "base_default_next" : "node_45",
+          "next_tables" : {
+            "hyperloglogsketch4096l93_6" : "node_45"
+          },
+          "default_entry" : {
+            "action_id" : 9,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_hyperloglogsketch4096l93_7",
+          "id" : 9,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 1025,
+            "source_fragment" : "="
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [10],
+          "actions" : ["hyperloglogsketch4096l93_7"],
+          "base_default_next" : "node_45",
+          "next_tables" : {
+            "hyperloglogsketch4096l93_7" : "node_45"
+          },
+          "default_entry" : {
+            "action_id" : 10,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_hyperloglogsketch4096l93_8",
+          "id" : 10,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 1112,
+            "source_fragment" : "="
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [11],
+          "actions" : ["hyperloglogsketch4096l93_8"],
+          "base_default_next" : "node_45",
+          "next_tables" : {
+            "hyperloglogsketch4096l93_8" : "node_45"
+          },
+          "default_entry" : {
+            "action_id" : 11,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_hyperloglogsketch4096l93_9",
+          "id" : 11,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 1199,
+            "source_fragment" : "="
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [12],
+          "actions" : ["hyperloglogsketch4096l93_9"],
+          "base_default_next" : "node_45",
+          "next_tables" : {
+            "hyperloglogsketch4096l93_9" : "node_45"
+          },
+          "default_entry" : {
+            "action_id" : 12,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_hyperloglogsketch4096l93_10",
+          "id" : 12,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 1287,
+            "source_fragment" : "="
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [13],
+          "actions" : ["hyperloglogsketch4096l93_10"],
+          "base_default_next" : "node_45",
+          "next_tables" : {
+            "hyperloglogsketch4096l93_10" : "node_45"
+          },
+          "default_entry" : {
+            "action_id" : 13,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_hyperloglogsketch4096l93_11",
+          "id" : 13,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 1376,
+            "source_fragment" : "="
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [14],
+          "actions" : ["hyperloglogsketch4096l93_11"],
+          "base_default_next" : "node_45",
+          "next_tables" : {
+            "hyperloglogsketch4096l93_11" : "node_45"
+          },
+          "default_entry" : {
+            "action_id" : 14,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_hyperloglogsketch4096l93_12",
+          "id" : 14,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 1465,
+            "source_fragment" : "="
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [15],
+          "actions" : ["hyperloglogsketch4096l93_12"],
+          "base_default_next" : "node_45",
+          "next_tables" : {
+            "hyperloglogsketch4096l93_12" : "node_45"
+          },
+          "default_entry" : {
+            "action_id" : 15,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_hyperloglogsketch4096l93_13",
+          "id" : 15,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 1554,
+            "source_fragment" : "="
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [16],
+          "actions" : ["hyperloglogsketch4096l93_13"],
+          "base_default_next" : "node_45",
+          "next_tables" : {
+            "hyperloglogsketch4096l93_13" : "node_45"
+          },
+          "default_entry" : {
+            "action_id" : 16,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_hyperloglogsketch4096l93_14",
+          "id" : 16,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 1643,
+            "source_fragment" : "="
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [17],
+          "actions" : ["hyperloglogsketch4096l93_14"],
+          "base_default_next" : "node_45",
+          "next_tables" : {
+            "hyperloglogsketch4096l93_14" : "node_45"
+          },
+          "default_entry" : {
+            "action_id" : 17,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_hyperloglogsketch4096l93_15",
+          "id" : 17,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 1732,
+            "source_fragment" : "="
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [18],
+          "actions" : ["hyperloglogsketch4096l93_15"],
+          "base_default_next" : "node_45",
+          "next_tables" : {
+            "hyperloglogsketch4096l93_15" : "node_45"
+          },
+          "default_entry" : {
+            "action_id" : 18,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_hyperloglogsketch4096l93_16",
+          "id" : 18,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 1821,
+            "source_fragment" : "="
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [19],
+          "actions" : ["hyperloglogsketch4096l93_16"],
+          "base_default_next" : "node_45",
+          "next_tables" : {
+            "hyperloglogsketch4096l93_16" : "node_45"
+          },
+          "default_entry" : {
+            "action_id" : 19,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_hyperloglogsketch4096l93_17",
+          "id" : 19,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 1910,
+            "source_fragment" : "="
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [20],
+          "actions" : ["hyperloglogsketch4096l93_17"],
+          "base_default_next" : "node_45",
+          "next_tables" : {
+            "hyperloglogsketch4096l93_17" : "node_45"
+          },
+          "default_entry" : {
+            "action_id" : 20,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_hyperloglogsketch4096l93_18",
+          "id" : 20,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 1999,
+            "source_fragment" : "="
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [21],
+          "actions" : ["hyperloglogsketch4096l93_18"],
+          "base_default_next" : "node_45",
+          "next_tables" : {
+            "hyperloglogsketch4096l93_18" : "node_45"
+          },
+          "default_entry" : {
+            "action_id" : 21,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_hyperloglogsketch4096l93_19",
+          "id" : 21,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 2033,
+            "source_fragment" : "="
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [22],
+          "actions" : ["hyperloglogsketch4096l93_19"],
+          "base_default_next" : "node_45",
+          "next_tables" : {
+            "hyperloglogsketch4096l93_19" : "node_45"
+          },
+          "default_entry" : {
+            "action_id" : 22,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_hyperloglogsketch4096l93_20",
+          "id" : 22,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 2087,
+            "source_fragment" : "hyperloglog_sketch.write((bit<32>)meta.register_index_j, meta.rho)"
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [24],
+          "actions" : ["hyperloglogsketch4096l93_20"],
+          "base_default_next" : "MyIngress.dmac",
+          "next_tables" : {
+            "hyperloglogsketch4096l93_20" : "MyIngress.dmac"
+          },
+          "default_entry" : {
+            "action_id" : 24,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "MyIngress.dmac",
+          "id" : 23,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 75,
+            "column" : 10,
+            "source_fragment" : "dmac"
+          },
+          "key" : [
+            {
+              "match_type" : "exact",
+              "name" : "hdr.ethernet.dstAddr",
+              "target" : ["ethernet", "dstAddr"],
+              "mask" : null
+            }
+          ],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 256,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [1, 0],
+          "actions" : ["MyIngress.forward", "NoAction"],
+          "base_default_next" : null,
+          "next_tables" : {
+            "MyIngress.forward" : null,
+            "NoAction" : null
+          },
+          "default_entry" : {
+            "action_id" : 0,
+            "action_const" : false,
+            "action_data" : [],
+            "action_entry_const" : false
+          }
+        }
+      ],
+      "action_profiles" : [],
+      "conditionals" : [
+        {
+          "name" : "node_2",
+          "id" : 0,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 91,
+            "column" : 12,
+            "source_fragment" : "hdr.ipv4.isValid() && hdr.tcp.isValid()"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "and",
+              "left" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "d2b",
+                  "left" : null,
+                  "right" : {
+                    "type" : "field",
+                    "value" : ["ipv4", "$valid$"]
+                  }
+                }
+              },
+              "right" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "d2b",
+                  "left" : null,
+                  "right" : {
+                    "type" : "field",
+                    "value" : ["tcp", "$valid$"]
+                  }
+                }
+              }
+            }
+          },
+          "true_next" : "tbl_hyperloglogsketch4096l92",
+          "false_next" : "MyIngress.dmac"
+        },
+        {
+          "name" : "node_4",
+          "id" : 1,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 296,
+            "source_fragment" : "meta.hash_val_x == 0"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "==",
+              "left" : {
+                "type" : "field",
+                "value" : ["scalars", "metadata.hash_val_x"]
+              },
+              "right" : {
+                "type" : "hexstr",
+                "value" : "0x00000000"
+              }
+            }
+          },
+          "true_next" : "tbl_hyperloglogsketch4096l93",
+          "false_next" : "node_6"
+        },
+        {
+          "name" : "node_6",
+          "id" : 2,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 355,
+            "source_fragment" : "(bit<20>)meta.hash_val_w[0:0] == meta.hash_val_w"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "==",
+              "left" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : "&",
+                              "left" : {
+                                "type" : "expression",
+                                "value" : {
+                                  "op" : "&",
+                                  "left" : {
+                                    "type" : "expression",
+                                    "value" : {
+                                      "op" : "&",
+                                      "left" : {
+                                        "type" : "expression",
+                                        "value" : {
+                                          "op" : ">>",
+                                          "left" : {
+                                            "type" : "field",
+                                            "value" : ["scalars", "metadata.hash_val_x"]
+                                          },
+                                          "right" : {
+                                            "type" : "hexstr",
+                                            "value" : "0xc"
+                                          }
+                                        }
+                                      },
+                                      "right" : {
+                                        "type" : "hexstr",
+                                        "value" : "0xffffffff"
+                                      }
+                                    }
+                                  },
+                                  "right" : {
+                                    "type" : "hexstr",
+                                    "value" : "0x0fffff"
+                                  }
+                                }
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0x0fffff"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0x01"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x01"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              },
+              "right" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : ">>",
+                              "left" : {
+                                "type" : "field",
+                                "value" : ["scalars", "metadata.hash_val_x"]
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0xc"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0xffffffff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x0fffff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              }
+            }
+          },
+          "true_next" : "tbl_hyperloglogsketch4096l93_0",
+          "false_next" : "node_8"
+        },
+        {
+          "name" : "node_8",
+          "id" : 3,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 442,
+            "source_fragment" : "(bit<20>)meta.hash_val_w[1:0] == meta.hash_val_w"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "==",
+              "left" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : "&",
+                              "left" : {
+                                "type" : "expression",
+                                "value" : {
+                                  "op" : "&",
+                                  "left" : {
+                                    "type" : "expression",
+                                    "value" : {
+                                      "op" : "&",
+                                      "left" : {
+                                        "type" : "expression",
+                                        "value" : {
+                                          "op" : ">>",
+                                          "left" : {
+                                            "type" : "field",
+                                            "value" : ["scalars", "metadata.hash_val_x"]
+                                          },
+                                          "right" : {
+                                            "type" : "hexstr",
+                                            "value" : "0xc"
+                                          }
+                                        }
+                                      },
+                                      "right" : {
+                                        "type" : "hexstr",
+                                        "value" : "0xffffffff"
+                                      }
+                                    }
+                                  },
+                                  "right" : {
+                                    "type" : "hexstr",
+                                    "value" : "0x0fffff"
+                                  }
+                                }
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0x0fffff"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0x03"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x03"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              },
+              "right" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : ">>",
+                              "left" : {
+                                "type" : "field",
+                                "value" : ["scalars", "metadata.hash_val_x"]
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0xc"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0xffffffff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x0fffff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              }
+            }
+          },
+          "true_next" : "tbl_hyperloglogsketch4096l93_1",
+          "false_next" : "node_10"
+        },
+        {
+          "name" : "node_10",
+          "id" : 4,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 529,
+            "source_fragment" : "(bit<20>)meta.hash_val_w[2:0] == meta.hash_val_w"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "==",
+              "left" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : "&",
+                              "left" : {
+                                "type" : "expression",
+                                "value" : {
+                                  "op" : "&",
+                                  "left" : {
+                                    "type" : "expression",
+                                    "value" : {
+                                      "op" : "&",
+                                      "left" : {
+                                        "type" : "expression",
+                                        "value" : {
+                                          "op" : ">>",
+                                          "left" : {
+                                            "type" : "field",
+                                            "value" : ["scalars", "metadata.hash_val_x"]
+                                          },
+                                          "right" : {
+                                            "type" : "hexstr",
+                                            "value" : "0xc"
+                                          }
+                                        }
+                                      },
+                                      "right" : {
+                                        "type" : "hexstr",
+                                        "value" : "0xffffffff"
+                                      }
+                                    }
+                                  },
+                                  "right" : {
+                                    "type" : "hexstr",
+                                    "value" : "0x0fffff"
+                                  }
+                                }
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0x0fffff"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0x07"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x07"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              },
+              "right" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : ">>",
+                              "left" : {
+                                "type" : "field",
+                                "value" : ["scalars", "metadata.hash_val_x"]
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0xc"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0xffffffff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x0fffff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              }
+            }
+          },
+          "true_next" : "tbl_hyperloglogsketch4096l93_2",
+          "false_next" : "node_12"
+        },
+        {
+          "name" : "node_12",
+          "id" : 5,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 616,
+            "source_fragment" : "(bit<20>)meta.hash_val_w[3:0] == meta.hash_val_w"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "==",
+              "left" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : "&",
+                              "left" : {
+                                "type" : "expression",
+                                "value" : {
+                                  "op" : "&",
+                                  "left" : {
+                                    "type" : "expression",
+                                    "value" : {
+                                      "op" : "&",
+                                      "left" : {
+                                        "type" : "expression",
+                                        "value" : {
+                                          "op" : ">>",
+                                          "left" : {
+                                            "type" : "field",
+                                            "value" : ["scalars", "metadata.hash_val_x"]
+                                          },
+                                          "right" : {
+                                            "type" : "hexstr",
+                                            "value" : "0xc"
+                                          }
+                                        }
+                                      },
+                                      "right" : {
+                                        "type" : "hexstr",
+                                        "value" : "0xffffffff"
+                                      }
+                                    }
+                                  },
+                                  "right" : {
+                                    "type" : "hexstr",
+                                    "value" : "0x0fffff"
+                                  }
+                                }
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0x0fffff"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0x0f"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x0f"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              },
+              "right" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : ">>",
+                              "left" : {
+                                "type" : "field",
+                                "value" : ["scalars", "metadata.hash_val_x"]
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0xc"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0xffffffff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x0fffff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              }
+            }
+          },
+          "true_next" : "tbl_hyperloglogsketch4096l93_3",
+          "false_next" : "node_14"
+        },
+        {
+          "name" : "node_14",
+          "id" : 6,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 703,
+            "source_fragment" : "(bit<20>)meta.hash_val_w[4:0] == meta.hash_val_w"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "==",
+              "left" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : "&",
+                              "left" : {
+                                "type" : "expression",
+                                "value" : {
+                                  "op" : "&",
+                                  "left" : {
+                                    "type" : "expression",
+                                    "value" : {
+                                      "op" : "&",
+                                      "left" : {
+                                        "type" : "expression",
+                                        "value" : {
+                                          "op" : ">>",
+                                          "left" : {
+                                            "type" : "field",
+                                            "value" : ["scalars", "metadata.hash_val_x"]
+                                          },
+                                          "right" : {
+                                            "type" : "hexstr",
+                                            "value" : "0xc"
+                                          }
+                                        }
+                                      },
+                                      "right" : {
+                                        "type" : "hexstr",
+                                        "value" : "0xffffffff"
+                                      }
+                                    }
+                                  },
+                                  "right" : {
+                                    "type" : "hexstr",
+                                    "value" : "0x0fffff"
+                                  }
+                                }
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0x0fffff"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0x1f"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x1f"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              },
+              "right" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : ">>",
+                              "left" : {
+                                "type" : "field",
+                                "value" : ["scalars", "metadata.hash_val_x"]
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0xc"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0xffffffff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x0fffff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              }
+            }
+          },
+          "true_next" : "tbl_hyperloglogsketch4096l93_4",
+          "false_next" : "node_16"
+        },
+        {
+          "name" : "node_16",
+          "id" : 7,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 790,
+            "source_fragment" : "(bit<20>)meta.hash_val_w[5:0] == meta.hash_val_w"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "==",
+              "left" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : "&",
+                              "left" : {
+                                "type" : "expression",
+                                "value" : {
+                                  "op" : "&",
+                                  "left" : {
+                                    "type" : "expression",
+                                    "value" : {
+                                      "op" : "&",
+                                      "left" : {
+                                        "type" : "expression",
+                                        "value" : {
+                                          "op" : ">>",
+                                          "left" : {
+                                            "type" : "field",
+                                            "value" : ["scalars", "metadata.hash_val_x"]
+                                          },
+                                          "right" : {
+                                            "type" : "hexstr",
+                                            "value" : "0xc"
+                                          }
+                                        }
+                                      },
+                                      "right" : {
+                                        "type" : "hexstr",
+                                        "value" : "0xffffffff"
+                                      }
+                                    }
+                                  },
+                                  "right" : {
+                                    "type" : "hexstr",
+                                    "value" : "0x0fffff"
+                                  }
+                                }
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0x0fffff"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0x3f"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x3f"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              },
+              "right" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : ">>",
+                              "left" : {
+                                "type" : "field",
+                                "value" : ["scalars", "metadata.hash_val_x"]
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0xc"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0xffffffff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x0fffff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              }
+            }
+          },
+          "true_next" : "tbl_hyperloglogsketch4096l93_5",
+          "false_next" : "node_18"
+        },
+        {
+          "name" : "node_18",
+          "id" : 8,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 877,
+            "source_fragment" : "(bit<20>)meta.hash_val_w[6:0] == meta.hash_val_w"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "==",
+              "left" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : "&",
+                              "left" : {
+                                "type" : "expression",
+                                "value" : {
+                                  "op" : "&",
+                                  "left" : {
+                                    "type" : "expression",
+                                    "value" : {
+                                      "op" : "&",
+                                      "left" : {
+                                        "type" : "expression",
+                                        "value" : {
+                                          "op" : ">>",
+                                          "left" : {
+                                            "type" : "field",
+                                            "value" : ["scalars", "metadata.hash_val_x"]
+                                          },
+                                          "right" : {
+                                            "type" : "hexstr",
+                                            "value" : "0xc"
+                                          }
+                                        }
+                                      },
+                                      "right" : {
+                                        "type" : "hexstr",
+                                        "value" : "0xffffffff"
+                                      }
+                                    }
+                                  },
+                                  "right" : {
+                                    "type" : "hexstr",
+                                    "value" : "0x0fffff"
+                                  }
+                                }
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0x0fffff"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0x7f"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x7f"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              },
+              "right" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : ">>",
+                              "left" : {
+                                "type" : "field",
+                                "value" : ["scalars", "metadata.hash_val_x"]
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0xc"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0xffffffff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x0fffff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              }
+            }
+          },
+          "true_next" : "tbl_hyperloglogsketch4096l93_6",
+          "false_next" : "node_20"
+        },
+        {
+          "name" : "node_20",
+          "id" : 9,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 964,
+            "source_fragment" : "(bit<20>)meta.hash_val_w[7:0] == meta.hash_val_w"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "==",
+              "left" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : "&",
+                              "left" : {
+                                "type" : "expression",
+                                "value" : {
+                                  "op" : "&",
+                                  "left" : {
+                                    "type" : "expression",
+                                    "value" : {
+                                      "op" : "&",
+                                      "left" : {
+                                        "type" : "expression",
+                                        "value" : {
+                                          "op" : ">>",
+                                          "left" : {
+                                            "type" : "field",
+                                            "value" : ["scalars", "metadata.hash_val_x"]
+                                          },
+                                          "right" : {
+                                            "type" : "hexstr",
+                                            "value" : "0xc"
+                                          }
+                                        }
+                                      },
+                                      "right" : {
+                                        "type" : "hexstr",
+                                        "value" : "0xffffffff"
+                                      }
+                                    }
+                                  },
+                                  "right" : {
+                                    "type" : "hexstr",
+                                    "value" : "0x0fffff"
+                                  }
+                                }
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0x0fffff"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0xff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0xff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              },
+              "right" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : ">>",
+                              "left" : {
+                                "type" : "field",
+                                "value" : ["scalars", "metadata.hash_val_x"]
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0xc"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0xffffffff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x0fffff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              }
+            }
+          },
+          "true_next" : "tbl_hyperloglogsketch4096l93_7",
+          "false_next" : "node_22"
+        },
+        {
+          "name" : "node_22",
+          "id" : 10,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 1051,
+            "source_fragment" : "(bit<20>)meta.hash_val_w[8:0] == meta.hash_val_w"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "==",
+              "left" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : "&",
+                              "left" : {
+                                "type" : "expression",
+                                "value" : {
+                                  "op" : "&",
+                                  "left" : {
+                                    "type" : "expression",
+                                    "value" : {
+                                      "op" : "&",
+                                      "left" : {
+                                        "type" : "expression",
+                                        "value" : {
+                                          "op" : ">>",
+                                          "left" : {
+                                            "type" : "field",
+                                            "value" : ["scalars", "metadata.hash_val_x"]
+                                          },
+                                          "right" : {
+                                            "type" : "hexstr",
+                                            "value" : "0xc"
+                                          }
+                                        }
+                                      },
+                                      "right" : {
+                                        "type" : "hexstr",
+                                        "value" : "0xffffffff"
+                                      }
+                                    }
+                                  },
+                                  "right" : {
+                                    "type" : "hexstr",
+                                    "value" : "0x0fffff"
+                                  }
+                                }
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0x0fffff"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0x01ff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x01ff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              },
+              "right" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : ">>",
+                              "left" : {
+                                "type" : "field",
+                                "value" : ["scalars", "metadata.hash_val_x"]
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0xc"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0xffffffff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x0fffff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              }
+            }
+          },
+          "true_next" : "tbl_hyperloglogsketch4096l93_8",
+          "false_next" : "node_24"
+        },
+        {
+          "name" : "node_24",
+          "id" : 11,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 1138,
+            "source_fragment" : "(bit<20>)meta.hash_val_w[9:0] == meta.hash_val_w"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "==",
+              "left" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : "&",
+                              "left" : {
+                                "type" : "expression",
+                                "value" : {
+                                  "op" : "&",
+                                  "left" : {
+                                    "type" : "expression",
+                                    "value" : {
+                                      "op" : "&",
+                                      "left" : {
+                                        "type" : "expression",
+                                        "value" : {
+                                          "op" : ">>",
+                                          "left" : {
+                                            "type" : "field",
+                                            "value" : ["scalars", "metadata.hash_val_x"]
+                                          },
+                                          "right" : {
+                                            "type" : "hexstr",
+                                            "value" : "0xc"
+                                          }
+                                        }
+                                      },
+                                      "right" : {
+                                        "type" : "hexstr",
+                                        "value" : "0xffffffff"
+                                      }
+                                    }
+                                  },
+                                  "right" : {
+                                    "type" : "hexstr",
+                                    "value" : "0x0fffff"
+                                  }
+                                }
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0x0fffff"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0x03ff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x03ff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              },
+              "right" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : ">>",
+                              "left" : {
+                                "type" : "field",
+                                "value" : ["scalars", "metadata.hash_val_x"]
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0xc"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0xffffffff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x0fffff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              }
+            }
+          },
+          "true_next" : "tbl_hyperloglogsketch4096l93_9",
+          "false_next" : "node_26"
+        },
+        {
+          "name" : "node_26",
+          "id" : 12,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 1225,
+            "source_fragment" : "(bit<20>)meta.hash_val_w[10:0] == meta.hash_val_w"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "==",
+              "left" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : "&",
+                              "left" : {
+                                "type" : "expression",
+                                "value" : {
+                                  "op" : "&",
+                                  "left" : {
+                                    "type" : "expression",
+                                    "value" : {
+                                      "op" : "&",
+                                      "left" : {
+                                        "type" : "expression",
+                                        "value" : {
+                                          "op" : ">>",
+                                          "left" : {
+                                            "type" : "field",
+                                            "value" : ["scalars", "metadata.hash_val_x"]
+                                          },
+                                          "right" : {
+                                            "type" : "hexstr",
+                                            "value" : "0xc"
+                                          }
+                                        }
+                                      },
+                                      "right" : {
+                                        "type" : "hexstr",
+                                        "value" : "0xffffffff"
+                                      }
+                                    }
+                                  },
+                                  "right" : {
+                                    "type" : "hexstr",
+                                    "value" : "0x0fffff"
+                                  }
+                                }
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0x0fffff"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0x07ff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x07ff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              },
+              "right" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : ">>",
+                              "left" : {
+                                "type" : "field",
+                                "value" : ["scalars", "metadata.hash_val_x"]
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0xc"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0xffffffff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x0fffff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              }
+            }
+          },
+          "true_next" : "tbl_hyperloglogsketch4096l93_10",
+          "false_next" : "node_28"
+        },
+        {
+          "name" : "node_28",
+          "id" : 13,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 1314,
+            "source_fragment" : "(bit<20>)meta.hash_val_w[11:0] == meta.hash_val_w"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "==",
+              "left" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : "&",
+                              "left" : {
+                                "type" : "expression",
+                                "value" : {
+                                  "op" : "&",
+                                  "left" : {
+                                    "type" : "expression",
+                                    "value" : {
+                                      "op" : "&",
+                                      "left" : {
+                                        "type" : "expression",
+                                        "value" : {
+                                          "op" : ">>",
+                                          "left" : {
+                                            "type" : "field",
+                                            "value" : ["scalars", "metadata.hash_val_x"]
+                                          },
+                                          "right" : {
+                                            "type" : "hexstr",
+                                            "value" : "0xc"
+                                          }
+                                        }
+                                      },
+                                      "right" : {
+                                        "type" : "hexstr",
+                                        "value" : "0xffffffff"
+                                      }
+                                    }
+                                  },
+                                  "right" : {
+                                    "type" : "hexstr",
+                                    "value" : "0x0fffff"
+                                  }
+                                }
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0x0fffff"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0x0fff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x0fff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              },
+              "right" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : ">>",
+                              "left" : {
+                                "type" : "field",
+                                "value" : ["scalars", "metadata.hash_val_x"]
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0xc"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0xffffffff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x0fffff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              }
+            }
+          },
+          "true_next" : "tbl_hyperloglogsketch4096l93_11",
+          "false_next" : "node_30"
+        },
+        {
+          "name" : "node_30",
+          "id" : 14,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 1403,
+            "source_fragment" : "(bit<20>)meta.hash_val_w[12:0] == meta.hash_val_w"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "==",
+              "left" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : "&",
+                              "left" : {
+                                "type" : "expression",
+                                "value" : {
+                                  "op" : "&",
+                                  "left" : {
+                                    "type" : "expression",
+                                    "value" : {
+                                      "op" : "&",
+                                      "left" : {
+                                        "type" : "expression",
+                                        "value" : {
+                                          "op" : ">>",
+                                          "left" : {
+                                            "type" : "field",
+                                            "value" : ["scalars", "metadata.hash_val_x"]
+                                          },
+                                          "right" : {
+                                            "type" : "hexstr",
+                                            "value" : "0xc"
+                                          }
+                                        }
+                                      },
+                                      "right" : {
+                                        "type" : "hexstr",
+                                        "value" : "0xffffffff"
+                                      }
+                                    }
+                                  },
+                                  "right" : {
+                                    "type" : "hexstr",
+                                    "value" : "0x0fffff"
+                                  }
+                                }
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0x0fffff"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0x1fff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x1fff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              },
+              "right" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : ">>",
+                              "left" : {
+                                "type" : "field",
+                                "value" : ["scalars", "metadata.hash_val_x"]
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0xc"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0xffffffff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x0fffff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              }
+            }
+          },
+          "true_next" : "tbl_hyperloglogsketch4096l93_12",
+          "false_next" : "node_32"
+        },
+        {
+          "name" : "node_32",
+          "id" : 15,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 1492,
+            "source_fragment" : "(bit<20>)meta.hash_val_w[13:0] == meta.hash_val_w"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "==",
+              "left" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : "&",
+                              "left" : {
+                                "type" : "expression",
+                                "value" : {
+                                  "op" : "&",
+                                  "left" : {
+                                    "type" : "expression",
+                                    "value" : {
+                                      "op" : "&",
+                                      "left" : {
+                                        "type" : "expression",
+                                        "value" : {
+                                          "op" : ">>",
+                                          "left" : {
+                                            "type" : "field",
+                                            "value" : ["scalars", "metadata.hash_val_x"]
+                                          },
+                                          "right" : {
+                                            "type" : "hexstr",
+                                            "value" : "0xc"
+                                          }
+                                        }
+                                      },
+                                      "right" : {
+                                        "type" : "hexstr",
+                                        "value" : "0xffffffff"
+                                      }
+                                    }
+                                  },
+                                  "right" : {
+                                    "type" : "hexstr",
+                                    "value" : "0x0fffff"
+                                  }
+                                }
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0x0fffff"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0x3fff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x3fff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              },
+              "right" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : ">>",
+                              "left" : {
+                                "type" : "field",
+                                "value" : ["scalars", "metadata.hash_val_x"]
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0xc"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0xffffffff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x0fffff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              }
+            }
+          },
+          "true_next" : "tbl_hyperloglogsketch4096l93_13",
+          "false_next" : "node_34"
+        },
+        {
+          "name" : "node_34",
+          "id" : 16,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 1581,
+            "source_fragment" : "(bit<20>)meta.hash_val_w[14:0] == meta.hash_val_w"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "==",
+              "left" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : "&",
+                              "left" : {
+                                "type" : "expression",
+                                "value" : {
+                                  "op" : "&",
+                                  "left" : {
+                                    "type" : "expression",
+                                    "value" : {
+                                      "op" : "&",
+                                      "left" : {
+                                        "type" : "expression",
+                                        "value" : {
+                                          "op" : ">>",
+                                          "left" : {
+                                            "type" : "field",
+                                            "value" : ["scalars", "metadata.hash_val_x"]
+                                          },
+                                          "right" : {
+                                            "type" : "hexstr",
+                                            "value" : "0xc"
+                                          }
+                                        }
+                                      },
+                                      "right" : {
+                                        "type" : "hexstr",
+                                        "value" : "0xffffffff"
+                                      }
+                                    }
+                                  },
+                                  "right" : {
+                                    "type" : "hexstr",
+                                    "value" : "0x0fffff"
+                                  }
+                                }
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0x0fffff"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0x7fff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x7fff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              },
+              "right" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : ">>",
+                              "left" : {
+                                "type" : "field",
+                                "value" : ["scalars", "metadata.hash_val_x"]
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0xc"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0xffffffff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x0fffff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              }
+            }
+          },
+          "true_next" : "tbl_hyperloglogsketch4096l93_14",
+          "false_next" : "node_36"
+        },
+        {
+          "name" : "node_36",
+          "id" : 17,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 1670,
+            "source_fragment" : "(bit<20>)meta.hash_val_w[15:0] == meta.hash_val_w"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "==",
+              "left" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : "&",
+                              "left" : {
+                                "type" : "expression",
+                                "value" : {
+                                  "op" : "&",
+                                  "left" : {
+                                    "type" : "expression",
+                                    "value" : {
+                                      "op" : "&",
+                                      "left" : {
+                                        "type" : "expression",
+                                        "value" : {
+                                          "op" : ">>",
+                                          "left" : {
+                                            "type" : "field",
+                                            "value" : ["scalars", "metadata.hash_val_x"]
+                                          },
+                                          "right" : {
+                                            "type" : "hexstr",
+                                            "value" : "0xc"
+                                          }
+                                        }
+                                      },
+                                      "right" : {
+                                        "type" : "hexstr",
+                                        "value" : "0xffffffff"
+                                      }
+                                    }
+                                  },
+                                  "right" : {
+                                    "type" : "hexstr",
+                                    "value" : "0x0fffff"
+                                  }
+                                }
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0x0fffff"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0xffff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0xffff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              },
+              "right" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : ">>",
+                              "left" : {
+                                "type" : "field",
+                                "value" : ["scalars", "metadata.hash_val_x"]
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0xc"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0xffffffff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x0fffff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              }
+            }
+          },
+          "true_next" : "tbl_hyperloglogsketch4096l93_15",
+          "false_next" : "node_38"
+        },
+        {
+          "name" : "node_38",
+          "id" : 18,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 1759,
+            "source_fragment" : "(bit<20>)meta.hash_val_w[16:0] == meta.hash_val_w"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "==",
+              "left" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : "&",
+                              "left" : {
+                                "type" : "expression",
+                                "value" : {
+                                  "op" : "&",
+                                  "left" : {
+                                    "type" : "expression",
+                                    "value" : {
+                                      "op" : "&",
+                                      "left" : {
+                                        "type" : "expression",
+                                        "value" : {
+                                          "op" : ">>",
+                                          "left" : {
+                                            "type" : "field",
+                                            "value" : ["scalars", "metadata.hash_val_x"]
+                                          },
+                                          "right" : {
+                                            "type" : "hexstr",
+                                            "value" : "0xc"
+                                          }
+                                        }
+                                      },
+                                      "right" : {
+                                        "type" : "hexstr",
+                                        "value" : "0xffffffff"
+                                      }
+                                    }
+                                  },
+                                  "right" : {
+                                    "type" : "hexstr",
+                                    "value" : "0x0fffff"
+                                  }
+                                }
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0x0fffff"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0x01ffff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x01ffff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              },
+              "right" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : ">>",
+                              "left" : {
+                                "type" : "field",
+                                "value" : ["scalars", "metadata.hash_val_x"]
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0xc"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0xffffffff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x0fffff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              }
+            }
+          },
+          "true_next" : "tbl_hyperloglogsketch4096l93_16",
+          "false_next" : "node_40"
+        },
+        {
+          "name" : "node_40",
+          "id" : 19,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 1848,
+            "source_fragment" : "(bit<20>)meta.hash_val_w[17:0] == meta.hash_val_w"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "==",
+              "left" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : "&",
+                              "left" : {
+                                "type" : "expression",
+                                "value" : {
+                                  "op" : "&",
+                                  "left" : {
+                                    "type" : "expression",
+                                    "value" : {
+                                      "op" : "&",
+                                      "left" : {
+                                        "type" : "expression",
+                                        "value" : {
+                                          "op" : ">>",
+                                          "left" : {
+                                            "type" : "field",
+                                            "value" : ["scalars", "metadata.hash_val_x"]
+                                          },
+                                          "right" : {
+                                            "type" : "hexstr",
+                                            "value" : "0xc"
+                                          }
+                                        }
+                                      },
+                                      "right" : {
+                                        "type" : "hexstr",
+                                        "value" : "0xffffffff"
+                                      }
+                                    }
+                                  },
+                                  "right" : {
+                                    "type" : "hexstr",
+                                    "value" : "0x0fffff"
+                                  }
+                                }
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0x0fffff"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0x03ffff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x03ffff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              },
+              "right" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : ">>",
+                              "left" : {
+                                "type" : "field",
+                                "value" : ["scalars", "metadata.hash_val_x"]
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0xc"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0xffffffff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x0fffff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              }
+            }
+          },
+          "true_next" : "tbl_hyperloglogsketch4096l93_17",
+          "false_next" : "node_42"
+        },
+        {
+          "name" : "node_42",
+          "id" : 20,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 1937,
+            "source_fragment" : "(bit<20>)meta.hash_val_w[18:0] == meta.hash_val_w"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "==",
+              "left" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : "&",
+                              "left" : {
+                                "type" : "expression",
+                                "value" : {
+                                  "op" : "&",
+                                  "left" : {
+                                    "type" : "expression",
+                                    "value" : {
+                                      "op" : "&",
+                                      "left" : {
+                                        "type" : "expression",
+                                        "value" : {
+                                          "op" : ">>",
+                                          "left" : {
+                                            "type" : "field",
+                                            "value" : ["scalars", "metadata.hash_val_x"]
+                                          },
+                                          "right" : {
+                                            "type" : "hexstr",
+                                            "value" : "0xc"
+                                          }
+                                        }
+                                      },
+                                      "right" : {
+                                        "type" : "hexstr",
+                                        "value" : "0xffffffff"
+                                      }
+                                    }
+                                  },
+                                  "right" : {
+                                    "type" : "hexstr",
+                                    "value" : "0x0fffff"
+                                  }
+                                }
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0x0fffff"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0x07ffff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x07ffff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              },
+              "right" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : ">>",
+                              "left" : {
+                                "type" : "field",
+                                "value" : ["scalars", "metadata.hash_val_x"]
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0xc"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0xffffffff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x0fffff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0fffff"
+                  }
+                }
+              }
+            }
+          },
+          "true_next" : "tbl_hyperloglogsketch4096l93_18",
+          "false_next" : "tbl_hyperloglogsketch4096l93_19"
+        },
+        {
+          "name" : "node_45",
+          "id" : 21,
+          "source_info" : {
+            "filename" : "p4src/hyperloglog-sketch-4096.p4",
+            "line" : 93,
+            "column" : 2044,
+            "source_fragment" : "meta.current_register_val_Mj < meta.rho"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "<",
+              "left" : {
+                "type" : "field",
+                "value" : ["scalars", "metadata.current_register_val_Mj"]
+              },
+              "right" : {
+                "type" : "field",
+                "value" : ["scalars", "metadata.rho"]
+              }
+            }
+          },
+          "true_next" : "tbl_hyperloglogsketch4096l93_20",
+          "false_next" : "MyIngress.dmac"
+        }
+      ]
+    },
+    {
+      "name" : "egress",
+      "id" : 1,
+      "source_info" : {
+        "filename" : "p4src/hyperloglog-sketch-4096.p4",
+        "line" : 104,
+        "column" : 8,
+        "source_fragment" : "MyEgress"
+      },
+      "init_table" : null,
+      "tables" : [],
+      "action_profiles" : [],
+      "conditionals" : []
+    }
+  ],
+  "checksums" : [],
+  "force_arith" : [],
+  "extern_instances" : [],
+  "field_aliases" : [
+    [
+      "queueing_metadata.enq_timestamp",
+      ["standard_metadata", "enq_timestamp"]
+    ],
+    [
+      "queueing_metadata.enq_qdepth",
+      ["standard_metadata", "enq_qdepth"]
+    ],
+    [
+      "queueing_metadata.deq_timedelta",
+      ["standard_metadata", "deq_timedelta"]
+    ],
+    [
+      "queueing_metadata.deq_qdepth",
+      ["standard_metadata", "deq_qdepth"]
+    ],
+    [
+      "intrinsic_metadata.ingress_global_timestamp",
+      ["standard_metadata", "ingress_global_timestamp"]
+    ],
+    [
+      "intrinsic_metadata.egress_global_timestamp",
+      ["standard_metadata", "egress_global_timestamp"]
+    ],
+    [
+      "intrinsic_metadata.mcast_grp",
+      ["standard_metadata", "mcast_grp"]
+    ],
+    [
+      "intrinsic_metadata.egress_rid",
+      ["standard_metadata", "egress_rid"]
+    ],
+    [
+      "intrinsic_metadata.priority",
+      ["standard_metadata", "priority"]
+    ]
+  ],
+  "program" : "/home/p4/ddos/implementation/p4src/hyperloglog-sketch-4096.p4i",
+  "__meta__" : {
+    "version" : [2, 18],
+    "compiler" : "https://github.com/p4lang/p4c"
+  }
+}
